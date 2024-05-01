@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using PortalGalaxy.DataAccess;
+using PortalGalaxy.Repositories.Interfaces;
+using PortalGalaxy.Services.Interfaces;
+using PortalGalaxy.Services.Profiles;
+using Scrutor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +16,26 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<PortalGalaxyDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PortalGalaxy"));
+
+    // Ignoramos los warning por los query filter configurados
+    options.ConfigureWarnings(warnings =>
+    {
+        warnings.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning);
+    });
+});
+
+// Registramos las dependencias de Repositories y Services (SCRUTOR)
+builder.Services.Scan(selector => selector
+    .FromAssemblies(typeof(ICategoriaRepository).Assembly,
+        typeof(ICategoriaService).Assembly)
+    .AddClasses(false)
+    .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+    .AsMatchingInterface()
+    .WithTransientLifetime());
+
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<CategoriaProfile>();
 });
 
 var app = builder.Build();
@@ -24,29 +49,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("api/categorias", async (ICategoriaService service) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var response = await service.ListAsync();
 
-app.MapGet("/weatherforecast", () =>
+    return Results.Ok(response);
+});
+
+app.MapDelete("api/categorias/{id:int}", async (ICategoriaRepository repository, int id) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    await repository.DeleteAsync(id);
+
+    return Results.Ok();
+});
+
+app.MapGet("api/talleres", async (ITallerRepository repository) =>
+{
+    var collection = await repository.ListarAsync();
+
+    return Results.Ok(collection);
+});
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
