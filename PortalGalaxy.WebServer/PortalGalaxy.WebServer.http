@@ -1,0 +1,6 @@
+@PortalGalaxy.WebServer_HostAddress = http://localhost:5177
+
+GET {{PortalGalaxy.WebServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
