@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using PortalGalaxy.Entities;
 using PortalGalaxy.Repositories.Interfaces;
 using PortalGalaxy.Services.Interfaces;
 using PortalGalaxy.Shared.Request;
@@ -25,7 +26,7 @@ public class CategoriaService : ICategoriaService
         var response = new BaseResponseGeneric<ICollection<CategoriaDtoResponse>>();
         try
         {
-            var collection = await _repository.ListAsync();
+            var collection = await _repository.ListarEliminados();
 
             response.Data = _mapper.Map<ICollection<CategoriaDtoResponse>>(collection);
             response.Success = true;
@@ -39,23 +40,87 @@ public class CategoriaService : ICategoriaService
         return response;
     }
 
-    public Task<BaseResponseGeneric<CategoriaDtoRequest>> FindByIdAsync(int id)
+    public async Task<BaseResponseGeneric<CategoriaDtoRequest>> FindByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = new BaseResponseGeneric<CategoriaDtoRequest>();
+        try
+        {
+            var categoria = await _repository.FindByIdAsync(id);
+            if (categoria == null)
+            {
+                response.ErrorMessage = "Categoria no encontrada";
+                return response;
+            }
+
+            response.Data = _mapper.Map<CategoriaDtoRequest>(categoria);
+            response.Success = true;
+
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = "Error al buscar la categoria por ID";
+            _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+        }
+        return response;
     }
 
-    public Task<BaseResponse> AddAsync(CategoriaDtoRequest request)
+    public async Task<BaseResponse> AddAsync(CategoriaDtoRequest request)
     {
-        throw new NotImplementedException();
+        var response = new BaseResponse();
+        try
+        {
+            await _repository.AddAsync(_mapper.Map<Categoria>(request));
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = "Error al agregar la categoria";
+            _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+        }
+        return response;
     }
 
-    public Task<BaseResponse> UpdateAsync(int id, CategoriaDtoRequest request)
+    public async Task<BaseResponse> UpdateAsync(int id, CategoriaDtoRequest request)
     {
-        throw new NotImplementedException();
+        var response = new BaseResponse();
+        try
+        {
+            var categoria = await _repository.FindByIdAsync(id);
+            if (categoria == null)
+            {
+                response.ErrorMessage = "Categoria no encontrada";
+                return response;
+            }
+
+            _mapper.Map(request, categoria);
+
+            await _repository.UpdateAsync();
+
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = "Error al actualizar la categoria";
+            _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+        }
+
+        return response;
     }
 
-    public Task<BaseResponse> DeleteAsync(int id)
+    public async Task<BaseResponse> DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var response = new BaseResponse();
+        try
+        {
+            await _repository.DeleteAsync(id);
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = "Error al eliminar la categoria";
+            _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+        }
+
+        return response;
     }
 }

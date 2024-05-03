@@ -22,14 +22,16 @@ public class UserService : IUserService
     private readonly UserManager<GalaxyIdentityUser> _userManager;
     private readonly ILogger<UserService> _logger;
     private readonly IAlumnoRepository _alumnoRepository;
+    private readonly IEmailService _emailService;
 
     public UserService(IConfiguration configuration, UserManager<GalaxyIdentityUser> userManager, 
-        ILogger<UserService> logger, IAlumnoRepository alumnoRepository)
+        ILogger<UserService> logger, IAlumnoRepository alumnoRepository, IEmailService emailService)
     {
         _configuration = configuration;
         _userManager = userManager;
         _logger = logger;
         _alumnoRepository = alumnoRepository;
+        _emailService = emailService;
     }
     public async Task<LoginDtoResponse> LoginAsync(LoginDtoRequest request)
     {
@@ -142,7 +144,9 @@ public class UserService : IUserService
                 await _alumnoRepository.AddAsync(alumno);
                 
                 // Enviar un email
-                
+                await _emailService.SendEmailAsync(request.Email, "Portal Galaxy - Registro",
+                    $@"<strong><p>Felicidades {request.NombresCompleto}</p></strong>
+                     <p>Su cuenta ha sido creada satisfactoriamente</p>");
             }
             else
             {
@@ -195,6 +199,9 @@ public class UserService : IUserService
             
             // TODO: Enviar correo electronico con el token de reseteo.
             
+            await _emailService.SendEmailAsync(request.Email!, "Reset Password",
+                $"Please use the following token to reset your password: {token}");
+            
             response.Data = token;
             response.Success = true;
         }
@@ -222,6 +229,8 @@ public class UserService : IUserService
                 _logger.LogInformation("Contraseña restablecida con éxito");
                 
                 // TODO: Enviar un correo con el mensaje.
+                await _emailService.SendEmailAsync(request.Email!, "Reset Password Confirmation",
+                    "Your password has been successfully reset.");
             }
             else
             {

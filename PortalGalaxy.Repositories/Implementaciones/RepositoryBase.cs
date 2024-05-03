@@ -26,7 +26,7 @@ public class RepositoryBase<TEntity>(PortalGalaxyDbContext context) : IRepositor
             .ToListAsync();
     }
 
-    public async Task<TEntity?> FindAsync(int id)
+    public async Task<TEntity?> FindByIdAsync(int id)
     {
         return await Context.Set<TEntity>().FindAsync(id);
     }
@@ -44,7 +44,7 @@ public class RepositoryBase<TEntity>(PortalGalaxyDbContext context) : IRepositor
 
     public async Task DeleteAsync(int id)
     {
-        var registro = await FindAsync(id);
+        var registro = await FindByIdAsync(id);
         if (registro is not null)
         {
             registro.Estado = false;

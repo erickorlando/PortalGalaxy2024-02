@@ -8,6 +8,7 @@ using PortalGalaxy.DataAccess;
 using PortalGalaxy.Repositories.Interfaces;
 using PortalGalaxy.Services.Interfaces;
 using PortalGalaxy.Services.Profiles;
+using PortalGalaxy.Shared.Configuracion;
 using PortalGalaxy.WebServer.Endpoints;
 using Scrutor;
 
@@ -15,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string corConfiguration = "Blazor";
 
+builder.Services.Configure<AppSettings>(builder.Configuration);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -119,27 +121,7 @@ app.UseStaticFiles();
 
 app.UseCors(corConfiguration);
 
-app.MapGet("api/categorias", async (ICategoriaService service) =>
-{
-    var response = await service.ListAsync();
-
-    return Results.Ok(response);
-});
-
-app.MapDelete("api/categorias/{id:int}", async (ICategoriaRepository repository, int id) =>
-{
-    await repository.DeleteAsync(id);
-
-    return Results.Ok();
-});
-
-app.MapGet("api/talleres", async (ITallerRepository repository) =>
-{
-    var collection = await repository.ListarAsync();
-
-    return Results.Ok(collection);
-});
-
+app.MapCategoriaEndpoints();
 app.MapUserEndpoints();
 
 using (var scope = app.Services.CreateScope())
