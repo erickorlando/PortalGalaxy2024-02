@@ -1,9 +1,9 @@
-﻿using System.Net;
-using System.Net.Mail;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PortalGalaxy.Services.Interfaces;
 using PortalGalaxy.Shared.Configuracion;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace PortalGalaxy.Services.Implementaciones;
 
@@ -21,20 +21,18 @@ public class EmailService : IEmailService
     {
         try
         {
-            var mailMessage =
-                new MailMessage(new MailAddress(_smtpConfiguration.Usuario, _smtpConfiguration.Remitente)
-                , new MailAddress(email));
-            
-            mailMessage.Subject = subject;
-            mailMessage.Body = message;
+            var client = new SendGridClient(_smtpConfiguration.Password);
+            var from = new EmailAddress(_smtpConfiguration.Usuario, _smtpConfiguration.Remitente);
+            var to = new EmailAddress(email);
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, message, message);
+            var response = await client.SendEmailAsync(msg);
 
-            using var smtpClient = new SmtpClient(_smtpConfiguration.Servidor, _smtpConfiguration.Puerto);
-            
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(_smtpConfiguration.Usuario, _smtpConfiguration.Password);
-            smtpClient.EnableSsl = _smtpConfiguration.UsarSsl;
-
-            await smtpClient.SendMailAsync(mailMessage);
+            if (!response.IsSuccessStatusCode)
+            {
+                var result = await response.DeserializeResponseBodyAsync(response.Body);
+                
+                _logger.LogError(result.ToString());
+            }
         }
         catch (Exception ex)
         {

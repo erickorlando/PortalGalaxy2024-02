@@ -199,8 +199,8 @@ public class UserService : IUserService
             
             // TODO: Enviar correo electronico con el token de reseteo.
             
-            await _emailService.SendEmailAsync(request.Email!, "Reset Password",
-                $"Please use the following token to reset your password: {token}");
+            await _emailService.SendEmailAsync(user.Email!, "Resetear contraseña",
+                $"Por favor use el siguiente token para resetear su contraseña: {token}");
             
             response.Data = token;
             response.Success = true;
