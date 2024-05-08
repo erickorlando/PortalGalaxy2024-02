@@ -117,8 +117,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseStaticFiles();
-
 app.UseCors(corConfiguration);
 
 app.MapCategoriaEndpoints();
