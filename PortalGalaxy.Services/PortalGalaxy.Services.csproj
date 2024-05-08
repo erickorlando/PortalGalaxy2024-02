@@ -25,5 +25,9 @@
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
 		<PackageReference Include="SendGrid" Version="9.29.3" />
 	</ItemGroup>
+	
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 </Project>
