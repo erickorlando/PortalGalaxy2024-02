@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PortalGalaxy.DataAccess;
@@ -13,21 +12,24 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
+using PortalGalaxy.Shared.Configuracion;
 
 namespace PortalGalaxy.Services.Implementaciones;
 
 public class UserService : IUserService
 {
-    private readonly IConfiguration _configuration;
+    private readonly AppSettings _configuration;
     private readonly UserManager<GalaxyIdentityUser> _userManager;
     private readonly ILogger<UserService> _logger;
     private readonly IAlumnoRepository _alumnoRepository;
     private readonly IEmailService _emailService;
 
-    public UserService(IConfiguration configuration, UserManager<GalaxyIdentityUser> userManager, 
-        ILogger<UserService> logger, IAlumnoRepository alumnoRepository, IEmailService emailService)
+    public UserService(UserManager<GalaxyIdentityUser> userManager, 
+        ILogger<UserService> logger, IAlumnoRepository alumnoRepository, IEmailService emailService, IOptions<AppSettings> options)
     {
-        _configuration = configuration;
+        _configuration = options.Value;
         _userManager = userManager;
         _logger = logger;
         _alumnoRepository = alumnoRepository;
@@ -76,14 +78,14 @@ public class UserService : IUserService
             response.Roles = roles.ToList();
 
             // Creamos el JWT
-            var llaveSimetrica = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));
+            var llaveSimetrica = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.Jwt.SecretKey));
             var credenciales = new SigningCredentials(llaveSimetrica, SecurityAlgorithms.HmacSha256);
 
             var header = new JwtHeader(credenciales);
 
             var payload = new JwtPayload(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
+                _configuration.Jwt.Issuer,
+                _configuration.Jwt.Audience,
                 claims,
                 DateTime.Now,
                 fechaExpiracion
@@ -171,7 +173,7 @@ public class UserService : IUserService
         return response;
     }
 
-    public async Task<BaseResponseGeneric<string>> SendTokenToResetPasswordAsync(GenerateTokenToResetDtoRequest request)
+    public async Task<BaseResponse> SendTokenToResetPasswordAsync(GenerateTokenToResetDtoRequest request)
     {
         var response = new BaseResponseGeneric<string>();
         try
@@ -196,13 +198,13 @@ public class UserService : IUserService
             }
             
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // codificamos el token
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            await _emailService.SendEmailAsync(user.Email!, "Portal Galaxy - Solicitud de Reseteo de Clave",
+                @$"Por favor use el siguiente token para resetear su contraseña, haga click aqui:
+                    <p><a href=""{_configuration.UrlFrontend}/reset-password?email={request.Email}&token={token}"">Recuperar clave</a></p>");
             
-            // TODO: Enviar correo electronico con el token de reseteo.
-            
-            await _emailService.SendEmailAsync(user.Email!, "Resetear contraseña",
-                $"Por favor use el siguiente token para resetear su contraseña: {token}");
-            
-            response.Data = token;
             response.Success = true;
         }
         catch (Exception ex)
@@ -229,7 +231,7 @@ public class UserService : IUserService
                 _logger.LogInformation("Contraseña restablecida con éxito");
                 
                 // TODO: Enviar un correo con el mensaje.
-                await _emailService.SendEmailAsync(request.Email!, "Reset Password Confirmation",
+                await _emailService.SendEmailAsync(request.Email, "Reset Password Confirmation",
                     "Your password has been successfully reset.");
             }
             else

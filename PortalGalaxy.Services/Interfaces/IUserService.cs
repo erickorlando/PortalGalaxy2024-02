@@ -9,7 +9,7 @@ public interface IUserService
 
     Task<BaseResponse> RegisterAsync(RegistrarUsuarioDto request);
 
-    Task<BaseResponseGeneric<string>> SendTokenToResetPasswordAsync(GenerateTokenToResetDtoRequest request);
+    Task<BaseResponse> SendTokenToResetPasswordAsync(GenerateTokenToResetDtoRequest request);
     
     Task<BaseResponse> ResetPasswordAsync(ResetPasswordDtoRequest request);
 }
