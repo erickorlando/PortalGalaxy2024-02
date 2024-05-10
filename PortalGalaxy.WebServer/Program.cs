@@ -20,6 +20,7 @@ builder.Services.Configure<AppSettings>(builder.Configuration);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(policy =>
@@ -77,6 +78,7 @@ builder.Services.Scan(selector => selector
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<CategoriaProfile>();
+    config.AddProfile<TallerProfile>();
 });
 
 builder.Services.AddAuthorization();
@@ -121,6 +123,7 @@ app.UseCors(corConfiguration);
 
 app.MapCategoriaEndpoints();
 app.MapUserEndpoints();
+app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
