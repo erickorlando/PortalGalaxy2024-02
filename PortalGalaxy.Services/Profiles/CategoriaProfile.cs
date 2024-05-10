@@ -10,6 +10,7 @@ public class CategoriaProfile : Profile
     public CategoriaProfile()
     {
         CreateMap<Categoria, CategoriaDtoResponse>();
-        CreateMap<Categoria, CategoriaDtoRequest>();
+        CreateMap<Categoria, CategoriaDtoRequest>()
+            .ReverseMap();
     }
 }

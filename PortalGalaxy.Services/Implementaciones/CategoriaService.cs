@@ -26,7 +26,7 @@ public class CategoriaService : ICategoriaService
         var response = new BaseResponseGeneric<ICollection<CategoriaDtoResponse>>();
         try
         {
-            var collection = await _repository.ListarEliminados();
+            var collection = await _repository.ListAsync();
 
             response.Data = _mapper.Map<ICollection<CategoriaDtoResponse>>(collection);
             response.Success = true;
