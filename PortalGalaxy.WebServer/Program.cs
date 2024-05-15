@@ -36,7 +36,8 @@ builder.Services.AddCors(policy =>
 builder.Services.AddDbContext<PortalGalaxyDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PortalGalaxy"));
-
+    options.EnableSensitiveDataLogging(); // Revelamos los parametros en los queries de EF
+    
     // Ignoramos los warning por los query filter configurados
     options.ConfigureWarnings(warnings =>
     {
@@ -79,6 +80,7 @@ builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<CategoriaProfile>();
     config.AddProfile<TallerProfile>();
+    config.AddProfile<InstructorProfile>();
 });
 
 builder.Services.AddAuthorization();
