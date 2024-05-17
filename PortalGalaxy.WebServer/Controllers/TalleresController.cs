@@ -16,9 +16,25 @@ public class TalleresController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery]BusquedaTallerRequest request)
+    public async Task<IActionResult> Get([FromQuery] BusquedaTallerRequest request)
     {
         var response = await _service.ListAsync(request);
+
+        return response.Success ? Ok(response) : BadRequest(response);
+    }
+
+    [HttpGet("inscritos")]
+    public async Task<IActionResult> Get([FromQuery] BusquedaInscritosPorTallerRequest request)
+    {
+        var response = await _service.ListAsync(request);
+
+        return response.Success ? Ok(response) : BadRequest(response);
+    }
+
+    [HttpGet("simple")]
+    public async Task<IActionResult> Get()
+    {
+        var response = await _service.ListSimpleAsync();
 
         return response.Success ? Ok(response) : BadRequest(response);
     }
