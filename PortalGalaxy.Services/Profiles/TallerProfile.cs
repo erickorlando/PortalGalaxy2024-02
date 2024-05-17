@@ -19,5 +19,13 @@ public class TallerProfile : Profile
         CreateMap<TallerDtoRequest, Taller>()
             .ReverseMap();
 
+        CreateMap<InscritosPorTallerInfo, InscritosPorTallerDtoResponse>();
+
+        CreateMap<TallerHomeInfo, TallerHomeDtoResponse>();
+
+        CreateMap<TalleresPorMesInfo, TalleresPorMesDto>();
+
+        CreateMap<TalleresPorInstructorInfo, TalleresPorInstructorDto>();
+
     }
 }

@@ -129,6 +129,13 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<PortalGalaxyDbContext>();
+
+    dbContext.Database.Migrate();
+
+    var securityDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    securityDbContext.Database.Migrate();
+
     await UserDataSeeder.Seed(scope.ServiceProvider);
 }
 
