@@ -61,6 +61,7 @@ public class InscripcionesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         var response = await _service.DeleteAsync(id);

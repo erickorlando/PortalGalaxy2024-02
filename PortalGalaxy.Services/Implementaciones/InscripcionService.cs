@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using PortalGalaxy.Entities;
+using PortalGalaxy.Entities.Infos;
 using PortalGalaxy.Repositories.Interfaces;
 using PortalGalaxy.Services.Interfaces;
 using PortalGalaxy.Services.Utils;
@@ -35,7 +36,7 @@ public class InscripcionService : IInscripcionService
             var tupla = await _repository.ListAsync(request.Inscrito, request.Taller, request.Situacion,
                 request.FechaInicio, request.FechaFin, request.Pagina, request.Filas);
 
-            response.Data = _mapper.Map<ICollection<InscripcionDtoResponse>>(tupla.Colecction);
+            response.Data = _mapper.Map<ICollection<InscripcionDtoResponse>>(tupla.Collection);
             response.TotalPages = Helper.GetTotalPages(tupla.Total, request.Filas);
             response.Success = true;
         }
