@@ -31,15 +31,7 @@ public class AlumnosController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("Eliminados")]
-    public async Task<IActionResult> Get()
-    {
-        var response = await _service.ListarEliminadosAsync();
-
-        return Ok(response);
-    }
-
-    [HttpGet("{id:int}")]
+   [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
         var response = await _service.FindByIdAsync(id);
@@ -71,9 +63,4 @@ public class AlumnosController : ControllerBase
         return response.Success ? Ok(response) : NotFound(response);
     }
 
-    [HttpPatch("{id:int}")]
-    public async Task<IActionResult> Patch(int id)
-    {
-        return Ok(await _service.ReactivarAsync(id));
-    }
 }

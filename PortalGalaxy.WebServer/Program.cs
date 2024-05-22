@@ -11,10 +11,20 @@ using PortalGalaxy.Services.Profiles;
 using PortalGalaxy.Shared.Configuracion;
 using PortalGalaxy.WebServer.Endpoints;
 using Scrutor;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
 const string corConfiguration = "Blazor";
+
+// Configuracion de Logs
+var logger = new LoggerConfiguration()
+    .WriteTo.Console(LogEventLevel.Information)
+    .CreateLogger();
+
+builder.Logging.ClearProviders(); // Esto borra los loggers por default.
+builder.Logging.AddSerilog(logger);
 
 builder.Services.Configure<AppSettings>(builder.Configuration);
 // Add services to the container.

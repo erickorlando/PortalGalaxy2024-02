@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PortalGalaxy.Services.Interfaces;
 using PortalGalaxy.Shared;
@@ -11,10 +12,12 @@ namespace PortalGalaxy.WebServer.Controllers;
 public class InscripcionesController : ControllerBase
 {
     private readonly IInscripcionService _service;
+    private readonly ILogger<InscripcionesController> _logger;
 
-    public InscripcionesController(IInscripcionService service)
+    public InscripcionesController(IInscripcionService service, ILogger<InscripcionesController> logger)
     {
         _service = service;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -37,7 +40,11 @@ public class InscripcionesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Post([FromBody] InscripcionDtoRequest request)
     {
-        var response = await _service.AddAsync(User.Identity!.Name!, request);
+        var usuario = User.Claims.First(p => p.Type == ClaimTypes.Email).Value;
+        
+        _logger.LogInformation(usuario);
+        
+        var response = await _service.AddAsync(usuario, request);
 
         return response.Success ? Ok(response) : BadRequest(response);
     }

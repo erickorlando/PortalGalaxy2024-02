@@ -24,9 +24,28 @@ public class TallerService : ITallerService
         _fileUploader = fileUploader;
     }
 
-    public Task<BaseResponseGeneric<ICollection<TallerSimpleDtoResponse>>> ListSimpleAsync()
+    public async Task<BaseResponseGeneric<ICollection<TallerSimpleDtoResponse>>> ListSimpleAsync()
     {
-        throw new NotImplementedException();
+        var response = new BaseResponseGeneric<ICollection<TallerSimpleDtoResponse>>();
+        try
+        {
+            response.Data = await _repository.ListAsync(
+                predicate: x =>
+                    x.Situacion == SituacionTaller.Aperturada || x.Situacion == SituacionTaller.Por_Aperturar,
+                selector: x => new TallerSimpleDtoResponse
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre
+                });
+
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = "Error al listar los Talleres";
+            _logger.LogError(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+        }
+        return response;
     }
 
     public async Task<PaginationResponse<TallerHomeDtoResponse>> ListarTalleresHomeAsync(BusquedaTallerHomeRequest request)
