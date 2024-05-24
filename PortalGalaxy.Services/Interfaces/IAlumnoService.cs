@@ -16,8 +16,5 @@ public interface IAlumnoService
     Task<BaseResponse> UpdateAsync(int id, AlumnoDtoRequest request);
 
     Task<BaseResponse> DeleteAsync(int id);
-
-    Task<BaseResponseGeneric<ICollection<AlumnoDtoResponse>>> ListarEliminadosAsync();
-
-    Task<BaseResponse> ReactivarAsync(int id);
+    
 }
