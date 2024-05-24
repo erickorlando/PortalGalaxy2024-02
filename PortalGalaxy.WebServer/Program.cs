@@ -136,6 +136,8 @@ app.UseCors(corConfiguration);
 
 app.MapCategoriaEndpoints();
 app.MapUserEndpoints();
+app.MapReportes();
+
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
