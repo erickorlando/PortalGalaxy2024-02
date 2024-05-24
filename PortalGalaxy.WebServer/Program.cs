@@ -21,6 +21,7 @@ const string corConfiguration = "Blazor";
 // Configuracion de Logs
 var logger = new LoggerConfiguration()
     .WriteTo.Console(LogEventLevel.Information)
+    .WriteTo.File("log-.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: LogEventLevel.Warning)
     .CreateLogger();
 
 builder.Logging.ClearProviders(); // Esto borra los loggers por default.
